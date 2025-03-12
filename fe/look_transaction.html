@@ -10,51 +10,52 @@
     .navbar-brand {
       font-size: 1.5rem;
     }
+    
+    .company-header {
+      font-weight: bold;
+      font-size: 1.2rem;
+      background-color: #f8f9fa;
+      padding: 8px;
+    }
+
+    /* Hide buttons and navbar when printing */
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+
+      * {
+        -webkit-print-color-adjust: exact !important; /* Pastikan warna tetap ada */
+        print-color-adjust: exact !important;
+      }
+    }
   </style>
 </head>
 
 <body>
-  <nav class="navbar navbar-dark bg-dark">
+  <nav class="navbar navbar-dark bg-dark no-print">
     <div class="container-fluid">
       <a href="index.html" class="navbar-brand">← Back to Dashboard</a>
     </div>
   </nav>
 
   <div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
       <h1>Transaction List</h1>
-      <button class="btn btn-success" onclick="downloadPDFTransactions()">Download PDF</button>
+      <button class="btn btn-primary" onclick="printTransactions()">Print to PDF</button>
       <a href="transaction.html" class="btn btn-primary">Create Transaction</a>
     </div>
 
-    <script>
-      function downloadPDFTransactions() {
-          window.open("http://localhost:8080/api/transaction/pdf", "_blank");
-      }
-    </script>
-
-    <div class="mb-4">
+    <div class="mb-4 no-print">
       <input type="text" id="searchInput" class="form-control" placeholder="Search by company name..." onkeyup="searchTransaction()">
     </div>
 
-    <table class="table table-bordered">
-      <thead class="table-dark">
-        <tr>
-          <th>Company Name</th>
-          <th>Product Name</th>
-          <th>Quantity</th>
-          <th>Total Price</th>
-          <th>Created At</th>
-        </tr>
-      </thead>
-      <tbody id="transaction-list"></tbody>
-    </table>
+    <div id="transaction-list"></div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', loadTransactions);
 
-    // Load transaction data
     function loadTransactions() {
       fetch('http://localhost:8080/api/transaction')
         .then(response => response.json())
@@ -64,26 +65,51 @@
         .catch(error => console.error('Error:', error));
     }
 
-    // Display transactions in the table
     function displayTransactions(transactions) {
       const transactionList = document.getElementById('transaction-list');
       transactionList.innerHTML = '';
 
+      const groupedTransactions = {};
+
       transactions.forEach(transaction => {
-        const row = `
-          <tr>
-            <td>${transaction.company_name}</td>
-            <td>${transaction.product_name}</td>
-            <td>${transaction.quantity}</td>
-            <td>${transaction.total_price}</td>
-            <td>${transaction.created_at}</td>
-          </tr>
+        if (!groupedTransactions[transaction.company_name]) {
+          groupedTransactions[transaction.company_name] = [];
+        }
+        groupedTransactions[transaction.company_name].push(transaction);
+      });
+
+      Object.keys(groupedTransactions).forEach(company => {
+        const companyBlock = document.createElement('div');
+        companyBlock.classList.add('mb-4');
+        
+        companyBlock.innerHTML = `
+          <div class="company-header">Company Name: ${company}</div>
+          <table class="table table-bordered">
+            <thead class="table-dark">
+              <tr>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+                <th>Created At</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${groupedTransactions[company].map(transaction => `
+                <tr>
+                  <td>${transaction.product_name}</td>
+                  <td>${transaction.quantity}</td>
+                  <td>${transaction.total_price}</td>
+                  <td>${transaction.created_at}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
         `;
-        transactionList.innerHTML += row;
+
+        transactionList.appendChild(companyBlock);
       });
     }
 
-    // Search function
     function searchTransaction() {
       const searchInput = document.getElementById('searchInput').value.toLowerCase();
       fetch('http://localhost:8080/api/transaction')
@@ -92,6 +118,10 @@
           const filteredTransactions = data.filter(transaction => transaction.company_name.toLowerCase().includes(searchInput));
           displayTransactions(filteredTransactions);
         });
+    }
+
+    function printTransactions() {
+      window.print(); // Opens the browser's print dialog
     }
   </script>
 
