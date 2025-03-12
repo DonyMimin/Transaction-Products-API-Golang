@@ -11,6 +11,7 @@ require (
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator/v10 v10.3.0 // indirect
+	github.com/jung-kurt/gofpdf v1.16.2 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/tkanos/gonfig v0.0.0-20180326121832-e83209aed2d1 // indirect
 )

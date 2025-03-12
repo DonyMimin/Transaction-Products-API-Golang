@@ -24,6 +24,7 @@ func main() {
 	e.GET("/api/product/:id", controller.GetProduct)
 	e.POST("/api/product", controller.UpsertProduct)
 	e.DELETE("/api/product/:id", controller.DeleteProduct)
+	e.GET("/api/products/pdf", controller.ExportProductPDF)
 
 	// Company
 	e.GET("/api/company", controller.GetListCompany)
@@ -33,6 +34,7 @@ func main() {
 	// Transaction
 	e.GET("/api/transaction", controller.GetListTransaction)
 	e.POST("/api/transaction", controller.CreateTransaction)
+	e.GET("/api/transaction/pdf", controller.ExportTransactionPDF)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

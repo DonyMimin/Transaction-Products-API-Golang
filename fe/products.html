@@ -24,8 +24,15 @@
   <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h1>Product List</h1>
+      <button class="btn btn-success" onclick="downloadPDFProducts()">Download PDF</button>
       <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">Create Product</button>
     </div>
+
+    <script>
+      function downloadPDFProducts() {
+          window.open("http://localhost:8080/api/products/pdf", "_blank");
+      }
+    </script>
 
     <div class="mb-4">
       <input type="text" id="searchInput" class="form-control" placeholder="Search by product name..." onkeyup="searchProduct()">

@@ -6,6 +6,7 @@ import (
 
 	"github.com/DonyMimin/Go-crud-echo/models"
 	"github.com/DonyMimin/Go-crud-echo/services"
+	"github.com/DonyMimin/Go-crud-echo/utils"
 	"github.com/labstack/echo"
 )
 
@@ -90,4 +91,38 @@ func DeleteProduct(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, "error")
 	}
 	return c.JSON(http.StatusOK, "success")
+}
+
+// ExportProductPDF generates a PDF report of products
+func ExportProductPDF(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	// Get data from service
+	data, err := services.GetListProduct(ctx)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to retrieve data"})
+	}
+
+	// Convert data to [][]string for the PDF
+	var pdfData [][]string
+	for _, product := range data {
+		pdfData = append(pdfData, []string{
+			strconv.Itoa(product.ProductID),
+			product.NamaProduct,
+			strconv.Itoa(product.Price),
+			strconv.Itoa(product.Stock),
+		})
+	}
+
+	// Define headers
+	headers := []string{"ID", "Product Name", "Price", "Stock"}
+
+	// Generate PDF
+	outputFile := "products.pdf"
+	err = utils.GeneratePDF("Product List", headers, pdfData, outputFile)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to generate PDF"})
+	}
+
+	return c.File(outputFile)
 }
