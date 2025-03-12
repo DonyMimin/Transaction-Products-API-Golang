@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transaction</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .navbar-brand {
+      font-size: 1.5rem;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a href="index.html" class="navbar-brand">← Back to Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Transaction List</h1>
+      <a href="transaction.html" class="btn btn-primary">Create Transaction</a>
+    </div>
+
+    <div class="mb-4">
+      <input type="text" id="searchInput" class="form-control" placeholder="Search by company name..." onkeyup="searchTransaction()">
+    </div>
+
+    <table class="table table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>Company Name</th>
+          <th>Product Name</th>
+          <th>Quantity</th>
+          <th>Total Price</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody id="transaction-list"></tbody>
+    </table>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', loadTransactions);
+
+    // Load transaction data
+    function loadTransactions() {
+      fetch('http://localhost:8080/api/transaction')
+        .then(response => response.json())
+        .then(data => {
+          displayTransactions(data);
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    // Display transactions in the table
+    function displayTransactions(transactions) {
+      const transactionList = document.getElementById('transaction-list');
+      transactionList.innerHTML = '';
+
+      transactions.forEach(transaction => {
+        const row = `
+          <tr>
+            <td>${transaction.company_name}</td>
+            <td>${transaction.product_name}</td>
+            <td>${transaction.quantity}</td>
+            <td>${transaction.total_price}</td>
+            <td>${transaction.created_at}</td>
+          </tr>
+        `;
+        transactionList.innerHTML += row;
+      });
+    }
+
+    // Search function
+    function searchTransaction() {
+      const searchInput = document.getElementById('searchInput').value.toLowerCase();
+      fetch('http://localhost:8080/api/transaction')
+        .then(response => response.json())
+        .then(data => {
+          const filteredTransactions = data.filter(transaction => transaction.company_name.toLowerCase().includes(searchInput));
+          displayTransactions(filteredTransactions);
+        });
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
